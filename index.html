@@ -238,6 +238,42 @@
       outline: 0;
       box-shadow: 0 0 0 3px rgba(51, 134, 50, 0.12);
     }
+    .program-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .program-option {
+      min-width: 0;
+      padding: 15px;
+      border: 1.5px solid #ced4d5;
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--darker-kale);
+      text-align: left;
+      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+    .program-option:hover { border-color: var(--opal); background: var(--lightest-kale); }
+    .program-option[aria-pressed="true"] {
+      border-color: var(--emerald);
+      background: var(--lightest-emerald);
+      box-shadow: 0 0 0 2px rgba(51, 134, 50, 0.08);
+    }
+    .program-name { display: block; font-size: 15px; font-weight: 750; }
+    .program-price { display: block; margin-top: 4px; font-size: 13px; font-weight: 650; }
+    .program-evidence { display: block; margin-top: 7px; color: #65736e; font-size: 11px; line-height: 1.35; }
+    .program-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 11px;
+      padding: 10px 12px;
+      border-radius: 7px;
+      background: var(--lightest-green-black);
+      color: #65736e;
+      font-size: 12px;
+    }
+    .program-total strong { color: var(--darker-kale); font-size: 13px; font-variant-numeric: tabular-nums; }
     .assumptions {
       margin-top: 26px;
       padding-top: 23px;
@@ -520,6 +556,7 @@
       .hero::after { right: -18px; top: 28px; }
       .calculator-section, .math-section, .research-section { padding: 64px 0 70px; }
       .inputs-panel, .result-body, .result-hero { padding: 24px; }
+      .program-options { grid-template-columns: 1fr; }
       .metrics { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 60px 1fr 58px; }
       .increment-callout { display: block; }
@@ -565,8 +602,8 @@
     <section class="evidence-strip" aria-label="Evidence behind the model">
       <div class="container evidence-grid">
         <div class="evidence-item"><strong>26.08%</strong><span>increase in completed tasks across three randomized developer field experiments</span></div>
-        <div class="evidence-item"><strong>16.8%</strong><span>relative increase in assessed agentic proficiency after Andela's two-week program</span></div>
-        <div class="evidence-item"><strong>4.38 pts</strong><span>modeled additional productivity capacity in the default proportional scenario</span></div>
+        <div class="evidence-item"><strong id="evidence-proficiency">16.8%</strong><span id="evidence-proficiency-copy">relative increase in assessed agentic proficiency after Andela 101</span></div>
+        <div class="evidence-item"><strong id="evidence-increment">4.38 pts</strong><span>modeled additional productivity capacity in the selected program scenario</span></div>
       </div>
     </section>
 
@@ -596,11 +633,20 @@
             </div>
 
             <div class="field">
-              <label for="investment"><span>Total program investment</span><span class="field-note">Defaults to $1,000 × learners</span></label>
-              <div class="input-wrap">
-                <span class="input-affix prefix" aria-hidden="true">$</span>
-                <input class="with-prefix" id="investment" type="number" min="0" max="100000000" step="1000" value="100000" inputmode="numeric">
+              <label id="program-label"><span>Training program</span><span class="field-note">Select one</span></label>
+              <div class="program-options" role="group" aria-labelledby="program-label">
+                <button class="program-option" type="button" data-program="101" aria-pressed="true">
+                  <span class="program-name">Andela 101</span>
+                  <span class="program-price">$1,000 / learner</span>
+                  <span class="program-evidence">Observed improvement: 16.8%</span>
+                </button>
+                <button class="program-option" type="button" data-program="201" aria-pressed="false">
+                  <span class="program-name">Andela 201</span>
+                  <span class="program-price">$3,000 / learner</span>
+                  <span class="program-evidence">Modeled improvement: 33.6%</span>
+                </button>
               </div>
+              <div class="program-total"><span>Total program investment</span><strong id="program-total">$100,000</strong></div>
             </div>
 
             <div class="field">
@@ -641,7 +687,7 @@
             <div class="result-hero">
               <span class="result-label" id="results-heading">Modeled annual value</span>
               <strong class="result-primary" id="annual-value">+$329K</strong>
-              <p id="annual-value-copy">Usable engineering capacity across 100 trained engineers, assuming the organization converts 50% of the added capacity into useful work.</p>
+              <p id="annual-value-copy">Usable engineering capacity across 100 engineers trained in Andela 101, assuming the organization converts 50% of the added capacity into useful work.</p>
             </div>
             <div class="result-body">
               <div class="metrics">
@@ -688,14 +734,14 @@
             <span class="formula">Base productivity lift = 26.08%</span>
           </div>
           <div class="step">
-            <h3>Apply the observed proficiency improvement</h3>
-            <p>Andela learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase.</p>
-            <span class="formula">26.08% × 1.168 = 30.46%</span>
+            <h3 id="proficiency-step-heading">Apply the observed proficiency improvement</h3>
+            <p id="proficiency-step-copy">Andela 101 learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase.</p>
+            <span class="formula" id="proficiency-formula">26.08% × 1.168 = 30.46%</span>
           </div>
           <div class="step">
             <h3>Value only the incremental capacity</h3>
-            <p>The model values the 4.38-point difference, then counts the selected share as usable engineering capacity and subtracts the total program investment.</p>
-            <span class="formula">Engineers × loaded cost × 4.38% × capture rate</span>
+            <p id="increment-step-copy">The model values the 4.38-point difference, then counts the selected share as usable engineering capacity and subtracts the total program investment.</p>
+            <span class="formula" id="increment-formula">Engineers × loaded cost × 4.38% × capture rate</span>
           </div>
         </div>
       </div>
@@ -779,6 +825,7 @@
         <aside class="caveat">
           <h3>What this estimate means</h3>
           <p>This is an illustrative business-case model, not a measured production outcome. The calculator assumes that the relative proficiency improvement translates proportionally into increased productivity value from AI tools. Actual results vary by team, work type, adoption, and implementation quality.</p>
+          <p>Andela 101 uses the observed 16.8% relative learning improvement. Andela 201 uses a 33.6% planning assumption.</p>
           <p>No reduction in headcount is implied. “Value” represents capacity that an organization may redirect toward higher-value engineering work.</p>
         </aside>
       </div>
@@ -799,19 +846,23 @@
       var defaults = {
         teamSize: 100,
         loadedCost: 150000,
-        investment: 100000,
-        pricePerLearner: 1000,
         realization: 50,
         benchmark: 26.08,
-        proficiency: 16.8
+        proficiency: 16.8,
+        program: "101"
       };
 
-      var investmentOverridden = false;
+      var programs = {
+        "101": { name: "Andela 101", pricePerLearner: 1000, proficiency: 16.8, evidence: "observed" },
+        "201": { name: "Andela 201", pricePerLearner: 3000, proficiency: 33.6, evidence: "modeled" }
+      };
+
+      var selectedProgram = defaults.program;
+      var programButtons = Array.prototype.slice.call(document.querySelectorAll("[data-program]"));
 
       var fields = {
         teamSize: document.getElementById("team-size"),
         loadedCost: document.getElementById("loaded-cost"),
-        investment: document.getElementById("investment"),
         realization: document.getElementById("realization"),
         benchmark: document.getElementById("benchmark"),
         proficiency: document.getElementById("proficiency")
@@ -828,7 +879,16 @@
         incrementValue: document.getElementById("increment-value"),
         relativeGainLabel: document.getElementById("relative-gain-label"),
         baselineBar: document.getElementById("baseline-bar"),
-        trainedBar: document.getElementById("trained-bar")
+        trainedBar: document.getElementById("trained-bar"),
+        programTotal: document.getElementById("program-total"),
+        evidenceProficiency: document.getElementById("evidence-proficiency"),
+        evidenceProficiencyCopy: document.getElementById("evidence-proficiency-copy"),
+        evidenceIncrement: document.getElementById("evidence-increment"),
+        proficiencyStepHeading: document.getElementById("proficiency-step-heading"),
+        proficiencyStepCopy: document.getElementById("proficiency-step-copy"),
+        proficiencyFormula: document.getElementById("proficiency-formula"),
+        incrementStepCopy: document.getElementById("increment-step-copy"),
+        incrementFormula: document.getElementById("increment-formula")
       };
 
       function numberFrom(input, fallback) {
@@ -854,10 +914,12 @@
       function update() {
         var teamSize = Math.max(1, Math.round(numberFrom(fields.teamSize, defaults.teamSize)));
         var loadedCost = numberFrom(fields.loadedCost, defaults.loadedCost);
-        var investment = numberFrom(fields.investment, defaults.investment);
+        var program = programs[selectedProgram];
+        var investment = teamSize * program.pricePerLearner;
         var realization = Math.min(100, numberFrom(fields.realization, defaults.realization)) / 100;
         var benchmarkPct = numberFrom(fields.benchmark, defaults.benchmark);
         var proficiencyPct = numberFrom(fields.proficiency, defaults.proficiency);
+        var usesProgramDefault = Math.abs(proficiencyPct - program.proficiency) < 0.001;
 
         var trainedLiftPct = benchmarkPct * (1 + proficiencyPct / 100);
         var incrementalLiftPct = trainedLiftPct - benchmarkPct;
@@ -869,7 +931,7 @@
         var perPersonValue = realizedAnnualValue / teamSize;
 
         output.annualValue.textContent = "+" + money(realizedAnnualValue, true);
-        output.annualValueCopy.textContent = "Usable engineering capacity across " + teamSize.toLocaleString("en-US") + " trained engineers, assuming the organization converts " + percent(realization * 100, 0) + " of the added capacity into useful work.";
+        output.annualValueCopy.textContent = "Usable engineering capacity across " + teamSize.toLocaleString("en-US") + " engineers trained in " + program.name + ", assuming the organization converts " + percent(realization * 100, 0) + " of the added capacity into useful work.";
         output.roi.textContent = roi === null ? "—" : percent(Math.round(roi), 0);
         output.payback.textContent = paybackMonths === null ? "—" : paybackMonths.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " mo";
         output.perPerson.textContent = money(perPersonValue, false);
@@ -877,6 +939,21 @@
         output.trainedValue.textContent = percent(trainedLiftPct, 2);
         output.incrementValue.textContent = "+" + incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " percentage points";
         output.relativeGainLabel.textContent = "+" + percent(proficiencyPct, 1) + " more value captured";
+        output.programTotal.textContent = money(investment, false);
+        output.evidenceProficiency.textContent = percent(proficiencyPct, 1);
+        output.evidenceProficiencyCopy.textContent = program.evidence === "observed" && usesProgramDefault
+          ? "relative increase in assessed agentic proficiency after Andela 101"
+          : "selected scenario improvement for " + program.name;
+        output.evidenceIncrement.textContent = incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
+        output.proficiencyStepHeading.textContent = program.evidence === "observed" && usesProgramDefault
+          ? "Apply the observed proficiency improvement"
+          : "Apply the modeled proficiency improvement";
+        output.proficiencyStepCopy.textContent = program.evidence === "observed" && usesProgramDefault
+          ? "Andela 101 learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase."
+          : program.name + " uses a " + percent(proficiencyPct, 1) + " relative improvement planning assumption" + (program.evidence === "modeled" && usesProgramDefault ? "—double the observed Andela 101 result" : "") + ". Validation is pending.";
+        output.proficiencyFormula.textContent = percent(benchmarkPct, 2) + " × " + (1 + proficiencyPct / 100).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + " = " + percent(trainedLiftPct, 2);
+        output.incrementStepCopy.textContent = "The model values the " + incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "-point difference, then counts the selected share as usable engineering capacity and subtracts the " + money(investment, false) + " " + program.name + " investment.";
+        output.incrementFormula.textContent = "Engineers × loaded cost × " + percent(incrementalLiftPct, 2) + " × capture rate";
 
         var chartMax = Math.max(trainedLiftPct * 1.12, 1);
         output.baselineBar.style.width = Math.min(100, benchmarkPct / chartMax * 100) + "%";
@@ -890,20 +967,23 @@
         fields[key].addEventListener("change", update);
       });
 
-      fields.teamSize.addEventListener("input", function () {
-        if (!investmentOverridden) {
-          fields.investment.value = Math.max(1, Math.round(numberFrom(fields.teamSize, defaults.teamSize))) * defaults.pricePerLearner;
+      programButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          selectedProgram = button.dataset.program;
+          fields.proficiency.value = programs[selectedProgram].proficiency;
+          programButtons.forEach(function (option) {
+            option.setAttribute("aria-pressed", String(option.dataset.program === selectedProgram));
+          });
           update();
-        }
-      });
-
-      fields.investment.addEventListener("input", function () {
-        investmentOverridden = true;
+        });
       });
 
       document.getElementById("reset-button").addEventListener("click", function () {
         Object.keys(fields).forEach(function (key) { fields[key].value = defaults[key]; });
-        investmentOverridden = false;
+        selectedProgram = defaults.program;
+        programButtons.forEach(function (option) {
+          option.setAttribute("aria-pressed", String(option.dataset.program === selectedProgram));
+        });
         update();
       });
 
