@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Estimate the potential return from improving engineering teams' proficiency with AI coding agents.">
   <title>AI agent enablement ROI calculator — Andela Research</title>
+  <script>
+    // ?embed renders only the calculator, for use inside an iframe. Runs before first paint to avoid a flash.
+    if (/[?&]embed(=|&|$)/.test(location.search)) document.documentElement.classList.add("embed");
+  </script>
   <style>
     :root {
       --darker-kale: #10292c;
@@ -40,8 +44,7 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
+    input { font: inherit; }
     a { color: var(--emerald-text); }
     a:hover { color: var(--darker-kale); }
     :focus-visible {
@@ -163,7 +166,7 @@
       padding: 88px 0 96px;
       background: linear-gradient(180deg, var(--lightest-kale), var(--white) 34%);
     }
-    .section-heading { max-width: 720px; margin-bottom: 42px; }
+    .section-heading { max-width: 720px; margin: 0 auto 42px; text-align: center; }
     .section-heading .eyebrow { color: var(--emerald-text); }
     h2 {
       margin: 0;
@@ -174,30 +177,19 @@
     }
     .section-heading p:last-child {
       max-width: 660px;
-      margin: 16px 0 0;
+      margin: 16px auto 0;
       font-size: 18px;
     }
-    .calculator-grid {
-      display: grid;
-      grid-template-columns: minmax(300px, 0.8fr) minmax(420px, 1.2fr);
-      gap: 28px;
-      align-items: start;
-    }
-    .panel {
+    .calculator-card {
+      max-width: 720px;
+      margin: 0 auto;
+      overflow: hidden;
       border: 1px solid var(--lighter-green-black);
       border-radius: 16px;
       background: var(--white);
       box-shadow: var(--shadow);
     }
-    .inputs-panel { padding: 30px; }
-    .panel-title {
-      margin: 0 0 24px;
-      font-size: 21px;
-      font-weight: 650;
-      line-height: 1.25;
-    }
-    .field { margin-top: 20px; }
-    .field:first-of-type { margin-top: 0; }
+    .calculator-input { padding: 34px; }
     .field label {
       display: flex;
       justify-content: space-between;
@@ -207,103 +199,147 @@
       font-size: 14px;
       font-weight: 600;
     }
-    .field label.stacked-label { flex-direction: column; align-items: flex-start; gap: 2px; }
-    .field-note { color: #65736e; font-size: 12px; font-weight: 400; }
-    .input-wrap { position: relative; }
-    .input-affix {
-      position: absolute;
-      top: 50%;
-      color: #65736e;
-      transform: translateY(-50%);
+    .field label.slider-headline {
+      display: block;
+      margin: 0 0 22px;
+      color: var(--darker-kale);
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.3px;
+    }
+    .slider-headline output { color: var(--emerald-text); font-variant-numeric: tabular-nums; }
+    .range {
+      --fill: 20%;
+      display: block;
+      width: 100%;
+      height: 28px;
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .range::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 20px;
+      background: linear-gradient(90deg, var(--emerald) 0 var(--fill), var(--lighter-green-black) var(--fill) 100%);
+    }
+    .range::-moz-range-track {
+      height: 8px;
+      border-radius: 20px;
+      background: var(--lighter-green-black);
+    }
+    .range::-moz-range-progress {
+      height: 8px;
+      border-radius: 20px;
+      background: var(--emerald);
+    }
+    .range::-webkit-slider-thumb {
+      width: 26px;
+      height: 26px;
+      margin-top: -9px;
+      border: 3px solid var(--emerald);
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      -webkit-appearance: none;
+      appearance: none;
+      transition: transform 0.18s ease;
+    }
+    .range::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--emerald);
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease;
+    }
+    .range:active::-webkit-slider-thumb { transform: scale(1.12); }
+    .range:active::-moz-range-thumb { transform: scale(1.12); }
+    .range:focus-visible { outline: none; }
+    .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(51, 134, 50, 0.18), var(--shadow); }
+    .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 6px rgba(51, 134, 50, 0.18), var(--shadow); }
+    .return-chart {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr) 64px;
+      grid-template-areas:
+        "invest-label invest-track invest-amount"
+        "value-label value-track value-amount"
+        ". bracket .";
+      column-gap: 14px;
+      row-gap: 12px;
+      align-items: center;
+      margin-top: 34px;
+    }
+    .chart-label { color: #65736e; font-size: 13px; font-weight: 600; }
+    .chart-track {
+      display: flex;
+      height: 14px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: var(--lighter-green-black);
+    }
+    .chart-fill {
+      display: block;
+      flex: none;
+      min-width: 3px;
+      height: 100%;
+      transition: width 0.15s ease;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .chart-fill.invest { border-radius: 20px; background: var(--opal); }
+    .chart-fill.recovered { border-radius: 20px 0 0 20px; background: var(--light-emerald); }
+    .chart-fill.net { border-radius: 0 20px 20px 0; background: var(--emerald); }
+    .chart-amount {
+      color: var(--darker-kale);
+      font-size: 14px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .chart-guide-lane {
+      position: relative;
+      grid-column: invest-track;
+      grid-row: invest-track-start / value-track-end;
+      align-self: stretch;
+      margin: -6px 0;
       pointer-events: none;
     }
-    .input-affix.prefix { left: 15px; }
-    .input-affix.suffix { right: 15px; }
-    input[type="number"] {
-      width: 100%;
-      min-height: 48px;
-      padding: 11px 14px;
-      border: 1.5px solid #ced4d5;
-      border-radius: 8px;
-      background: var(--white);
-      color: var(--darker-kale);
-      font-size: 16px;
-      font-variant-numeric: tabular-nums;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    .chart-guide {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1.5px dashed var(--dark-green-black);
+      opacity: 0.35;
+      transition: left 0.15s ease;
     }
-    input.with-prefix { padding-left: 31px; }
-    input.with-suffix { padding-right: 42px; }
-    input[type="number"]:focus {
-      border-color: var(--emerald);
-      outline: 0;
-      box-shadow: 0 0 0 3px rgba(51, 134, 50, 0.12);
+    .chart-bracket-lane { position: relative; grid-area: bracket; height: 34px; margin-top: -4px; }
+    .chart-bracket {
+      position: absolute;
+      top: 0;
+      min-width: 6px;
+      height: 8px;
+      border: 1.5px solid var(--emerald-text);
+      border-top: 0;
+      border-radius: 0 0 4px 4px;
+      transition: left 0.15s ease, width 0.15s ease;
     }
-    .program-options {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .program-option {
-      min-width: 0;
-      padding: 15px;
-      border: 1.5px solid #ced4d5;
-      border-radius: 10px;
-      background: var(--white);
-      color: var(--darker-kale);
-      text-align: left;
-      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-    }
-    .program-option:hover { border-color: var(--opal); background: var(--lightest-kale); }
-    .program-option[aria-pressed="true"] {
-      border-color: var(--emerald);
-      background: var(--lightest-emerald);
-      box-shadow: 0 0 0 2px rgba(51, 134, 50, 0.08);
-    }
-    .program-name { display: block; font-size: 15px; font-weight: 750; }
-    .program-price { display: block; margin-top: 4px; font-size: 13px; font-weight: 650; }
-    .program-evidence { display: block; margin-top: 7px; color: #65736e; font-size: 11px; line-height: 1.35; }
-    .program-total {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      margin-top: 11px;
-      padding: 10px 12px;
-      border-radius: 7px;
-      background: var(--lightest-green-black);
-      color: #65736e;
-      font-size: 12px;
-    }
-    .program-total strong { color: var(--darker-kale); font-size: 13px; font-variant-numeric: tabular-nums; }
-    .assumptions {
-      margin-top: 26px;
-      padding-top: 23px;
-      border-top: 1px solid var(--lighter-green-black);
-    }
-    .assumptions summary {
-      color: var(--darker-kale);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .assumption-copy {
-      margin: 10px 0 0;
-      color: #65736e;
+    .chart-bracket-label {
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      color: var(--emerald-text);
       font-size: 13px;
-    }
-    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
-    .button {
-      min-height: 43px;
-      padding: 10px 17px;
-      border-radius: 8px;
-      font-size: 14px;
       font-weight: 700;
-      transition: background 0.18s ease, border-color 0.18s ease;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      transform: translateX(-50%);
     }
-    .button-primary { border: 1px solid var(--darker-kale); background: var(--darker-kale); color: var(--white); }
-    .button-primary:hover { background: var(--dark-kale); }
-    .button-secondary { border: 1.5px solid var(--darker-kale); background: transparent; color: var(--darker-kale); }
-    .button-secondary:hover { background: var(--lightest-green-black); }
-    .results-panel { overflow: hidden; }
+    .chart-bracket.is-narrow .chart-bracket-label { left: 0; transform: none; }
     .result-hero {
       position: relative;
       padding: 34px;
@@ -343,65 +379,22 @@
       font-variant-numeric: tabular-nums;
       line-height: 1.05;
     }
-    .result-hero p {
+    .result-summary {
       position: relative;
       z-index: 1;
-      max-width: 530px;
+      max-width: 560px;
       margin: 12px 0 0;
       color: var(--opal);
       font-size: 14px;
     }
-    .result-body { padding: 30px 34px 34px; }
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      overflow: hidden;
-      border: 1px solid var(--lighter-green-black);
-      border-radius: 12px;
-      background: var(--lighter-green-black);
+    .assumption-footnote {
+      max-width: 600px;
+      margin: 18px auto 0;
+      color: #65736e;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
     }
-    .metric { min-width: 0; padding: 20px 16px; background: var(--almost-white); }
-    .metric strong {
-      display: block;
-      overflow-wrap: anywhere;
-      color: var(--darker-kale);
-      font-family: var(--serif);
-      font-size: clamp(1.45rem, 3vw, 2rem);
-      font-variant-numeric: tabular-nums;
-      line-height: 1.15;
-    }
-    .metric span { display: block; margin-top: 5px; color: #65736e; font-size: 12px; line-height: 1.35; }
-    .comparison { margin-top: 28px; }
-    .comparison-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 15px;
-      color: var(--darker-kale);
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .comparison-title span:last-child { color: var(--emerald-text); }
-    .bar-row { display: grid; grid-template-columns: 72px 1fr 64px; gap: 11px; align-items: center; margin-top: 12px; }
-    .bar-name { color: #65736e; font-size: 12px; font-weight: 600; }
-    .bar-track { height: 12px; overflow: hidden; border-radius: 20px; background: var(--lighter-green-black); }
-    .bar-fill { display: block; height: 100%; width: 0; border-radius: inherit; transition: width 0.35s ease; }
-    .bar-fill.baseline { background: var(--opal); }
-    .bar-fill.trained { background: var(--emerald); }
-    .bar-value { color: var(--darker-kale); font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-    .increment-callout {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      margin-top: 22px;
-      padding: 17px 18px;
-      border-left: 3px solid var(--emerald);
-      background: var(--lightest-emerald);
-      color: var(--darker-kale);
-      font-size: 14px;
-    }
-    .increment-callout strong { color: var(--emerald-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .math-section { padding: 88px 0; background: var(--almost-white); border-block: 1px solid var(--lighter-green-black); }
     .math-grid { display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 70px; align-items: start; }
     .math-intro .eyebrow { color: var(--emerald-text); }
@@ -542,7 +535,7 @@
     }
 
     @media (max-width: 880px) {
-      .calculator-grid, .math-grid { grid-template-columns: 1fr; }
+      .math-grid { grid-template-columns: 1fr; }
       .math-grid { gap: 42px; }
       .evidence-grid { grid-template-columns: 1fr; }
       .evidence-item, .evidence-item:last-child { min-height: 0; border-right: 1px solid var(--lighter-green-black); border-bottom: 1px solid var(--lighter-green-black); }
@@ -555,17 +548,26 @@
       .hero { padding: 62px 0 66px; }
       .hero::after { right: -18px; top: 28px; }
       .calculator-section, .math-section, .research-section { padding: 64px 0 70px; }
-      .inputs-panel, .result-body, .result-hero { padding: 24px; }
-      .program-options { grid-template-columns: 1fr; }
-      .metrics { grid-template-columns: 1fr; }
-      .bar-row { grid-template-columns: 60px 1fr 58px; }
-      .increment-callout { display: block; }
-      .increment-callout strong { display: block; margin-top: 8px; }
+      .calculator-input, .result-hero { padding: 24px; }
+      .return-chart { grid-template-columns: 70px minmax(0, 1fr) 56px; column-gap: 10px; }
+      .chart-label, .chart-amount { font-size: 12px; }
       .research-grid { grid-template-columns: 1fr; }
       .research-card.anchor { grid-column: auto; grid-template-columns: 1fr; gap: 16px; }
       .footer-inner { display: block; }
       .footer-inner span { display: block; margin-top: 6px; }
     }
+    /* Embed mode: only the calculator card and footnote. Padding leaves room for the card shadow. */
+    html.embed body { background: transparent; overflow: hidden; }
+    html.embed .masthead,
+    html.embed .hero,
+    html.embed .evidence-strip,
+    html.embed .section-heading,
+    html.embed .math-section,
+    html.embed .research-section,
+    html.embed .notes-section,
+    html.embed footer { display: none; }
+    html.embed .calculator-section { padding: 12px 16px 16px; background: none; }
+    html.embed .calculator-section .container { width: 100%; }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
@@ -573,9 +575,8 @@
       .masthead { position: static; }
       .hero { padding: 42px 0; }
       .calculator-section, .math-section, .research-section, .notes-section { padding: 42px 0; }
-      .inputs-panel, .button-row { display: none; }
-      .calculator-grid { grid-template-columns: 1fr; }
-      .results-panel { box-shadow: none; }
+      .range { display: none; }
+      .calculator-card { box-shadow: none; }
       a { color: inherit; text-decoration: none; }
     }
   </style>
@@ -602,8 +603,8 @@
     <section class="evidence-strip" aria-label="Evidence behind the model">
       <div class="container evidence-grid">
         <div class="evidence-item"><strong>26.08%</strong><span>increase in completed tasks across three randomized developer field experiments</span></div>
-        <div class="evidence-item"><strong id="evidence-proficiency">16.8%</strong><span id="evidence-proficiency-copy">relative increase in assessed agentic proficiency after Andela 101</span></div>
-        <div class="evidence-item"><strong id="evidence-increment">4.38 pts</strong><span>modeled additional productivity capacity in the selected program scenario</span></div>
+        <div class="evidence-item"><strong>25.2%</strong><span>blended proficiency improvement across Andela 101 and 201</span></div>
+        <div class="evidence-item"><strong>6.57 pts</strong><span>modeled additional productivity capacity from training</span></div>
       </div>
     </section>
 
@@ -612,111 +613,31 @@
         <div class="section-heading">
           <p class="eyebrow">Build your business case</p>
           <h2>What could better agent proficiency be worth?</h2>
-          <p>Use your organization’s numbers. Results update instantly and represent a 12-month modeled return.</p>
+          <p>Choose how many engineers to train. Results update instantly and represent a 12-month modeled return.</p>
         </div>
 
-        <div class="calculator-grid">
-          <section class="panel inputs-panel" aria-labelledby="inputs-heading">
-            <h3 class="panel-title" id="inputs-heading">Your organization</h3>
-
-            <div class="field">
-              <label for="team-size"><span>Engineers trained</span></label>
-              <input id="team-size" type="number" min="1" max="100000" step="1" value="100" inputmode="numeric">
+        <div class="calculator-card">
+          <div class="calculator-input field slider-field">
+            <label class="slider-headline" for="team-size">Enable <output id="team-size-readout" for="team-size">100</output> <span id="team-size-noun">engineers</span></label>
+            <input class="range" id="team-size" type="range" min="1" max="500" step="1" value="100" aria-label="Engineers to enable" aria-valuetext="100 engineers">
+            <div class="return-chart">
+              <span class="chart-label" style="grid-area: invest-label">Invest</span>
+              <span class="chart-track" style="grid-area: invest-track" aria-hidden="true"><span class="chart-fill invest" id="invest-bar" style="width: 8.12%"></span></span>
+              <span class="chart-amount" style="grid-area: invest-amount" id="invest-amount">$200K</span>
+              <span class="chart-label" style="grid-area: value-label">ROI</span>
+              <span class="chart-track" style="grid-area: value-track" aria-hidden="true"><span class="chart-fill recovered" id="value-bar-recovered" style="width: 8.12%"></span><span class="chart-fill net" id="value-bar-net" style="width: 11.88%"></span></span>
+              <span class="chart-amount" style="grid-area: value-amount" id="value-amount">$493K</span>
+              <span class="chart-guide-lane" aria-hidden="true"><span class="chart-guide" id="chart-guide" style="left: 8.12%"></span></span>
+              <span class="chart-bracket-lane"><span class="chart-bracket is-narrow" id="net-bracket" style="left: 8.12%; width: 11.88%"><span class="chart-bracket-label" id="net-bracket-label">+$293K net</span></span></span>
             </div>
-
-            <div class="field">
-              <label for="loaded-cost"><span>Annual loaded cost per engineer</span><span class="field-note">Salary + benefits</span></label>
-              <div class="input-wrap">
-                <span class="input-affix prefix" aria-hidden="true">$</span>
-                <input class="with-prefix" id="loaded-cost" type="number" min="10000" max="1000000" step="1000" value="150000" inputmode="numeric">
-              </div>
-            </div>
-
-            <div class="field">
-              <label id="program-label"><span>Training program</span><span class="field-note">Select one</span></label>
-              <div class="program-options" role="group" aria-labelledby="program-label">
-                <button class="program-option" type="button" data-program="101" aria-pressed="true">
-                  <span class="program-name">Andela 101</span>
-                  <span class="program-price">$1,000 / learner</span>
-                  <span class="program-evidence">Observed improvement: 16.8%</span>
-                </button>
-                <button class="program-option" type="button" data-program="201" aria-pressed="false">
-                  <span class="program-name">Andela 201</span>
-                  <span class="program-price">$3,000 / learner</span>
-                  <span class="program-evidence">Modeled improvement: 33.6%</span>
-                </button>
-              </div>
-              <div class="program-total"><span>Total program investment</span><strong id="program-total">$100,000</strong></div>
-            </div>
-
-            <div class="field">
-              <label class="stacked-label" for="realization"><span>Share of added capacity converted into useful work</span><span class="field-note">Accounts for workflow constraints and uneven adoption</span></label>
-              <div class="input-wrap">
-                <input class="with-suffix" id="realization" type="number" min="0" max="100" step="5" value="50" inputmode="decimal">
-                <span class="input-affix suffix" aria-hidden="true">%</span>
-              </div>
-              <p class="assumption-copy">A conservative planning assumption for the portion of additional capacity your organization can put to productive use.</p>
-            </div>
-
-            <details class="assumptions">
-              <summary>Evidence assumptions</summary>
-              <p class="assumption-copy">These defaults come from the two studies cited below. Change them to run a more conservative or ambitious scenario.</p>
-              <div class="field">
-                <label for="benchmark"><span>AI productivity benchmark</span></label>
-                <div class="input-wrap">
-                  <input class="with-suffix" id="benchmark" type="number" min="0" max="200" step="0.01" value="26.08" inputmode="decimal">
-                  <span class="input-affix suffix" aria-hidden="true">%</span>
-                </div>
-              </div>
-              <div class="field">
-                <label for="proficiency"><span>Relative proficiency improvement</span></label>
-                <div class="input-wrap">
-                  <input class="with-suffix" id="proficiency" type="number" min="0" max="200" step="0.1" value="16.8" inputmode="decimal">
-                  <span class="input-affix suffix" aria-hidden="true">%</span>
-                </div>
-              </div>
-            </details>
-
-            <div class="button-row">
-              <button class="button button-primary" id="print-button" type="button">Print business case</button>
-              <button class="button button-secondary" id="reset-button" type="button">Reset assumptions</button>
-            </div>
-          </section>
-
-          <section class="panel results-panel" aria-labelledby="results-heading" aria-live="polite">
-            <div class="result-hero">
-              <span class="result-label" id="results-heading">Modeled annual value</span>
-              <strong class="result-primary" id="annual-value">+$329K</strong>
-              <p id="annual-value-copy">Usable engineering capacity across 100 engineers trained in Andela 101, assuming the organization converts 50% of the added capacity into useful work.</p>
-            </div>
-            <div class="result-body">
-              <div class="metrics">
-                <div class="metric"><strong id="roi-value">229%</strong><span>first-year ROI</span></div>
-                <div class="metric"><strong id="payback-value">3.7 mo</strong><span>payback period</span></div>
-                <div class="metric"><strong id="per-person-value">$3,286</strong><span>annual value per engineer</span></div>
-              </div>
-
-              <div class="comparison" aria-label="Productivity lift comparison">
-                <div class="comparison-title"><span>Modeled productivity lift</span><span id="relative-gain-label">+16.8% more value captured</span></div>
-                <div class="bar-row">
-                  <span class="bar-name">Tool only</span>
-                  <span class="bar-track"><span class="bar-fill baseline" id="baseline-bar"></span></span>
-                  <span class="bar-value" id="baseline-value">26.08%</span>
-                </div>
-                <div class="bar-row">
-                  <span class="bar-name">+ training</span>
-                  <span class="bar-track"><span class="bar-fill trained" id="trained-bar"></span></span>
-                  <span class="bar-value" id="trained-value">30.46%</span>
-                </div>
-              </div>
-
-              <div class="increment-callout">
-                <span>Additional modeled productivity capacity from training</span>
-                <strong id="increment-value">+4.38 percentage points</strong>
-              </div>
-            </div>
-          </section>
+          </div>
+          <div class="result-hero" aria-live="polite">
+            <span class="result-label">Modeled net return&nbsp;· first&nbsp;12&nbsp;months</span>
+            <strong class="result-primary" id="net-value">+$293K</strong>
+            <p class="result-summary" id="result-summary">146%&nbsp;ROI&nbsp;· 4.9-mo&nbsp;payback</p>
+          </div>
         </div>
+        <p class="assumption-footnote">Assumes $150K annual loaded cost per engineer, 50% of added capacity used productively, and the blended Andela 101 + 201 program at $2,000 per learner with a 25.2% proficiency lift.</p>
       </div>
     </section>
 
@@ -734,14 +655,14 @@
             <span class="formula">Base productivity lift = 26.08%</span>
           </div>
           <div class="step">
-            <h3 id="proficiency-step-heading">Apply the observed proficiency improvement</h3>
-            <p id="proficiency-step-copy">Andela 101 learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase.</p>
-            <span class="formula" id="proficiency-formula">26.08% × 1.168 = 30.46%</span>
+            <h3>Apply the blended proficiency improvement</h3>
+            <p>Andela 101 learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase. Andela 201 uses a 33.6% planning assumption. The calculator uses the 25.2% average of the two.</p>
+            <span class="formula">26.08% × 1.252 = 32.65%</span>
           </div>
           <div class="step">
             <h3>Value only the incremental capacity</h3>
-            <p id="increment-step-copy">The model values the 4.38-point difference, then counts the selected share as usable engineering capacity and subtracts the total program investment.</p>
-            <span class="formula" id="increment-formula">Engineers × loaded cost × 4.38% × capture rate</span>
+            <p>The model values the 6.57-point difference, counts half of it as usable engineering capacity, and subtracts the $2,000-per-learner program investment.</p>
+            <span class="formula">Engineers × $150K × 6.57% × 50% − engineers × $2,000</span>
           </div>
         </div>
       </div>
@@ -825,7 +746,7 @@
         <aside class="caveat">
           <h3>What this estimate means</h3>
           <p>This is an illustrative business-case model, not a measured production outcome. The calculator assumes that the relative proficiency improvement translates proportionally into increased productivity value from AI tools. Actual results vary by team, work type, adoption, and implementation quality.</p>
-          <p>Andela 101 uses the observed 16.8% relative learning improvement. Andela 201 uses a 33.6% planning assumption.</p>
+          <p>The 25.2% proficiency lift averages Andela 101’s observed 16.8% improvement with a 33.6% planning assumption for Andela 201, which has not yet been validated. Program cost is likewise the $2,000 average of both programs.</p>
           <p>No reduction in headcount is implied. “Value” represents capacity that an organization may redirect toward higher-value engineering work.</p>
         </aside>
       </div>
@@ -843,58 +764,33 @@
     (function () {
       "use strict";
 
-      var defaults = {
-        teamSize: 100,
-        loadedCost: 150000,
-        realization: 50,
+      // Blended Andela 101 + 201: average of $1,000 / $3,000 and 16.8% / 33.6%.
+      var model = {
+        pricePerLearner: 2000,
+        proficiency: 25.2,
         benchmark: 26.08,
-        proficiency: 16.8,
-        program: "101"
+        loadedCost: 150000,
+        realization: 0.5
       };
 
-      var programs = {
-        "101": { name: "Andela 101", pricePerLearner: 1000, proficiency: 16.8, evidence: "observed" },
-        "201": { name: "Andela 201", pricePerLearner: 3000, proficiency: 33.6, evidence: "modeled" }
-      };
-
-      var selectedProgram = defaults.program;
-      var programButtons = Array.prototype.slice.call(document.querySelectorAll("[data-program]"));
-
-      var fields = {
-        teamSize: document.getElementById("team-size"),
-        loadedCost: document.getElementById("loaded-cost"),
-        realization: document.getElementById("realization"),
-        benchmark: document.getElementById("benchmark"),
-        proficiency: document.getElementById("proficiency")
-      };
+      var slider = document.getElementById("team-size");
+      var minTeam = Number(slider.min);
+      var maxTeam = Number(slider.max);
 
       var output = {
-        annualValue: document.getElementById("annual-value"),
-        annualValueCopy: document.getElementById("annual-value-copy"),
-        roi: document.getElementById("roi-value"),
-        payback: document.getElementById("payback-value"),
-        perPerson: document.getElementById("per-person-value"),
-        baselineValue: document.getElementById("baseline-value"),
-        trainedValue: document.getElementById("trained-value"),
-        incrementValue: document.getElementById("increment-value"),
-        relativeGainLabel: document.getElementById("relative-gain-label"),
-        baselineBar: document.getElementById("baseline-bar"),
-        trainedBar: document.getElementById("trained-bar"),
-        programTotal: document.getElementById("program-total"),
-        evidenceProficiency: document.getElementById("evidence-proficiency"),
-        evidenceProficiencyCopy: document.getElementById("evidence-proficiency-copy"),
-        evidenceIncrement: document.getElementById("evidence-increment"),
-        proficiencyStepHeading: document.getElementById("proficiency-step-heading"),
-        proficiencyStepCopy: document.getElementById("proficiency-step-copy"),
-        proficiencyFormula: document.getElementById("proficiency-formula"),
-        incrementStepCopy: document.getElementById("increment-step-copy"),
-        incrementFormula: document.getElementById("increment-formula")
+        readout: document.getElementById("team-size-readout"),
+        noun: document.getElementById("team-size-noun"),
+        netValue: document.getElementById("net-value"),
+        summary: document.getElementById("result-summary"),
+        investBar: document.getElementById("invest-bar"),
+        recoveredBar: document.getElementById("value-bar-recovered"),
+        netBar: document.getElementById("value-bar-net"),
+        investAmount: document.getElementById("invest-amount"),
+        valueAmount: document.getElementById("value-amount"),
+        guide: document.getElementById("chart-guide"),
+        bracket: document.getElementById("net-bracket"),
+        bracketLabel: document.getElementById("net-bracket-label")
       };
-
-      function numberFrom(input, fallback) {
-        var value = Number(input.value);
-        return Number.isFinite(value) && value >= 0 ? value : fallback;
-      }
 
       function money(value, compact) {
         if (!Number.isFinite(value)) return "—";
@@ -912,86 +808,65 @@
       }
 
       function update() {
-        var teamSize = Math.max(1, Math.round(numberFrom(fields.teamSize, defaults.teamSize)));
-        var loadedCost = numberFrom(fields.loadedCost, defaults.loadedCost);
-        var program = programs[selectedProgram];
-        var investment = teamSize * program.pricePerLearner;
-        var realization = Math.min(100, numberFrom(fields.realization, defaults.realization)) / 100;
-        var benchmarkPct = numberFrom(fields.benchmark, defaults.benchmark);
-        var proficiencyPct = numberFrom(fields.proficiency, defaults.proficiency);
-        var usesProgramDefault = Math.abs(proficiencyPct - program.proficiency) < 0.001;
+        var raw = Math.round(Number(slider.value));
+        var teamSize = Math.min(maxTeam, Math.max(minTeam, Number.isFinite(raw) ? raw : 100));
+        var investment = teamSize * model.pricePerLearner;
 
-        var trainedLiftPct = benchmarkPct * (1 + proficiencyPct / 100);
-        var incrementalLiftPct = trainedLiftPct - benchmarkPct;
-        var grossAnnualCapacity = teamSize * loadedCost * (incrementalLiftPct / 100);
-        var realizedAnnualValue = grossAnnualCapacity * realization;
+        var trainedLiftPct = model.benchmark * (1 + model.proficiency / 100);
+        var incrementalLiftPct = trainedLiftPct - model.benchmark;
+        var realizedAnnualValue = teamSize * model.loadedCost * (incrementalLiftPct / 100) * model.realization;
         var netReturn = realizedAnnualValue - investment;
-        var roi = investment > 0 ? (netReturn / investment) * 100 : null;
-        var paybackMonths = realizedAnnualValue > 0 ? (investment / realizedAnnualValue) * 12 : null;
-        var perPersonValue = realizedAnnualValue / teamSize;
+        var roi = (netReturn / investment) * 100;
+        var paybackMonths = (investment / realizedAnnualValue) * 12;
 
-        output.annualValue.textContent = "+" + money(realizedAnnualValue, true);
-        output.annualValueCopy.textContent = "Usable engineering capacity across " + teamSize.toLocaleString("en-US") + " engineers trained in " + program.name + ", assuming the organization converts " + percent(realization * 100, 0) + " of the added capacity into useful work.";
-        output.roi.textContent = roi === null ? "—" : percent(Math.round(roi), 0);
-        output.payback.textContent = paybackMonths === null ? "—" : paybackMonths.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " mo";
-        output.perPerson.textContent = money(perPersonValue, false);
-        output.baselineValue.textContent = percent(benchmarkPct, 2);
-        output.trainedValue.textContent = percent(trainedLiftPct, 2);
-        output.incrementValue.textContent = "+" + incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " percentage points";
-        output.relativeGainLabel.textContent = "+" + percent(proficiencyPct, 1) + " more value captured";
-        output.programTotal.textContent = money(investment, false);
-        output.evidenceProficiency.textContent = percent(proficiencyPct, 1);
-        output.evidenceProficiencyCopy.textContent = program.evidence === "observed" && usesProgramDefault
-          ? "relative increase in assessed agentic proficiency after Andela 101"
-          : "selected scenario improvement for " + program.name;
-        output.evidenceIncrement.textContent = incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " pts";
-        output.proficiencyStepHeading.textContent = program.evidence === "observed" && usesProgramDefault
-          ? "Apply the observed proficiency improvement"
-          : "Apply the modeled proficiency improvement";
-        output.proficiencyStepCopy.textContent = program.evidence === "observed" && usesProgramDefault
-          ? "Andela 101 learners improved from 69.1% to 80.7% on an agentic proficiency assessment—a 16.8% relative increase."
-          : program.name + " uses a " + percent(proficiencyPct, 1) + " relative improvement planning assumption" + (program.evidence === "modeled" && usesProgramDefault ? "—double the observed Andela 101 result" : "") + ". Validation is pending.";
-        output.proficiencyFormula.textContent = percent(benchmarkPct, 2) + " × " + (1 + proficiencyPct / 100).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + " = " + percent(trainedLiftPct, 2);
-        output.incrementStepCopy.textContent = "The model values the " + incrementalLiftPct.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "-point difference, then counts the selected share as usable engineering capacity and subtracts the " + money(investment, false) + " " + program.name + " investment.";
-        output.incrementFormula.textContent = "Engineers × loaded cost × " + percent(incrementalLiftPct, 2) + " × capture rate";
+        var teamLabel = teamSize.toLocaleString("en-US");
+        var noun = teamSize === 1 ? "engineer" : "engineers";
+        output.readout.textContent = teamLabel;
+        output.noun.textContent = noun;
+        slider.setAttribute("aria-valuetext", teamLabel + " " + noun);
+        slider.style.setProperty("--fill", ((teamSize - minTeam) / (maxTeam - minTeam) * 100) + "%");
 
-        var chartMax = Math.max(trainedLiftPct * 1.12, 1);
-        output.baselineBar.style.width = Math.min(100, benchmarkPct / chartMax * 100) + "%";
-        output.trainedBar.style.width = Math.min(100, trainedLiftPct / chartMax * 100) + "%";
+        output.netValue.textContent = "+" + money(netReturn, true);
+        // Non-breaking spaces keep each item whole when the line wraps.
+        output.summary.textContent = percent(Math.round(roi), 0) + "\u00a0ROI\u00a0· " +
+          paybackMonths.toLocaleString("en-US", { maximumFractionDigits: 1 }) + "-mo\u00a0payback";
 
-        document.documentElement.dataset.netPositive = String(netReturn >= 0);
+        // Bars share a fixed scale (value at the maximum team size) so they grow with the slider.
+        var maxValue = maxTeam * model.loadedCost * (incrementalLiftPct / 100) * model.realization;
+        var investPct = investment / maxValue * 100;
+        var netPct = netReturn / maxValue * 100;
+        output.investBar.style.width = investPct + "%";
+        output.recoveredBar.style.width = investPct + "%";
+        output.netBar.style.width = netPct + "%";
+        output.guide.style.left = investPct + "%";
+        output.bracket.style.left = investPct + "%";
+        output.bracket.style.width = netPct + "%";
+        output.investAmount.textContent = money(investment, true);
+        output.valueAmount.textContent = money(realizedAnnualValue, true);
+        output.bracketLabel.textContent = "+" + money(netReturn, true) + " net";
+        // Center the label under the bracket only when it fits; otherwise run it rightward from the bracket's start.
+        var bracketPx = output.bracket.parentNode.clientWidth * netPct / 100;
+        output.bracket.classList.toggle("is-narrow", bracketPx < output.bracketLabel.offsetWidth + 12);
       }
 
-      Object.keys(fields).forEach(function (key) {
-        fields[key].addEventListener("input", update);
-        fields[key].addEventListener("change", update);
-      });
-
-      programButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-          selectedProgram = button.dataset.program;
-          fields.proficiency.value = programs[selectedProgram].proficiency;
-          programButtons.forEach(function (option) {
-            option.setAttribute("aria-pressed", String(option.dataset.program === selectedProgram));
-          });
-          update();
-        });
-      });
-
-      document.getElementById("reset-button").addEventListener("click", function () {
-        Object.keys(fields).forEach(function (key) { fields[key].value = defaults[key]; });
-        selectedProgram = defaults.program;
-        programButtons.forEach(function (option) {
-          option.setAttribute("aria-pressed", String(option.dataset.program === selectedProgram));
-        });
-        update();
-      });
-
-      document.getElementById("print-button").addEventListener("click", function () {
-        window.print();
-      });
+      slider.addEventListener("input", update);
+      window.addEventListener("resize", update);
 
       update();
+
+      // In embed mode, tell the host page our content height so it can size the iframe.
+      if (document.documentElement.classList.contains("embed") && window.parent !== window) {
+        var lastHeight = 0;
+        var postHeight = function () {
+          var height = Math.ceil(document.documentElement.getBoundingClientRect().height);
+          if (height === lastHeight) return;
+          lastHeight = height;
+          window.parent.postMessage({ type: "roi-calculator:height", height: height }, "*");
+        };
+        if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.body);
+        window.addEventListener("load", postHeight);
+        postHeight();
+      }
     }());
   </script>
 </body>
